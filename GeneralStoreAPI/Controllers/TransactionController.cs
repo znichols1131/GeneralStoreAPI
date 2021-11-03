@@ -16,6 +16,11 @@ namespace GeneralStoreAPI.Controllers
 
         // POST
         // api/Transaction
+        /// <summary>
+        /// Adds the new Transaction model to the database.
+        /// </summary>
+        /// <param name="model">New Transaction model to be added</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IHttpActionResult> PostTransaction([FromBody] Transaction model)
         {
@@ -66,6 +71,10 @@ namespace GeneralStoreAPI.Controllers
 
         // GET ALL
         // api/Transaction
+        /// <summary>
+        /// Gets all Transaction models in the database.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetAll()
         {
@@ -75,6 +84,11 @@ namespace GeneralStoreAPI.Controllers
 
         // GET ALL by CustomerId
         // api/Transaction?customerId={customerId}
+        /// <summary>
+        /// Gets the Transaction model with the corresponding Customer ID from the database.
+        /// </summary>
+        /// <param name="customerId">Customer ID</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetAllByCustomerId([FromUri]int customerId)
         {
@@ -84,6 +98,11 @@ namespace GeneralStoreAPI.Controllers
 
         // GET by Transaction Id
         // api/Transaction/{id}
+        /// <summary>
+        /// Gets the Transaction model with the corresponding ID from the database.
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetById([FromUri] int id)
         {
@@ -97,6 +116,12 @@ namespace GeneralStoreAPI.Controllers
 
         // PUT
         // api/Transaction/{id}
+        /// <summary>
+        /// Updates the Transaction model with the corresponding ID in the database.
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <param name="updatedTransaction">Updated Transaction model</param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<IHttpActionResult> UpdateById([FromUri] int id, [FromBody] Transaction updatedTransaction)
         {
@@ -172,6 +197,11 @@ namespace GeneralStoreAPI.Controllers
 
         // DELETE
         // api/Transaction/{id}
+        /// <summary>
+        /// Deletes the Transaction model with the corresponding ID from the database.
+        /// </summary>
+        /// <param name="id">Transaction ID</param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteTransaction([FromUri] int id)
         {

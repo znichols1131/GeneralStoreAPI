@@ -16,6 +16,11 @@ namespace GeneralStoreAPI.Controllers
 
         // POST
         // api/Customer
+        /// <summary>
+        /// Adds the new Customer model to the database.
+        /// </summary>
+        /// <param name="model">New Customer model to be added</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IHttpActionResult> PostCustomer([FromBody] Customer model)
         {
@@ -35,6 +40,10 @@ namespace GeneralStoreAPI.Controllers
 
         // GET ALL
         // api/Customer
+        /// <summary>
+        /// Gets all Customer models in the database.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetAll()
         {
@@ -44,6 +53,11 @@ namespace GeneralStoreAPI.Controllers
 
         // GET BY ID
         // api/Customer/{id}
+        /// <summary>
+        /// Gets the Customer model with the corresponding ID from the database.
+        /// </summary>
+        /// <param name="id">Customer ID</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetById([FromUri] int id)
         {
@@ -57,6 +71,12 @@ namespace GeneralStoreAPI.Controllers
 
         // PUT
         // api/Customer/{id}
+        /// <summary>
+        /// Updates the Customer model with the corresponding ID in the database.
+        /// </summary>
+        /// <param name="id">Customer ID</param>
+        /// <param name="updatedCustomer">Updated Customer model</param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<IHttpActionResult> UpdateById([FromUri] int id, [FromBody] Customer updatedCustomer)
         {
@@ -84,6 +104,11 @@ namespace GeneralStoreAPI.Controllers
 
         // DELETE
         // api/Customer/{id}
+        /// <summary>
+        /// Deletes the Customer model with the corresponding ID from the database.
+        /// </summary>
+        /// <param name="id">Customer ID</param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteCustomer([FromUri] int id)
         {

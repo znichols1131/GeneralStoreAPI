@@ -16,6 +16,11 @@ namespace GeneralStoreAPI.Controllers
 
         // POST
         // api/Product
+        /// <summary>
+        /// Adds the new Product model to the database.
+        /// </summary>
+        /// <param name="model">New Product model to be added</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IHttpActionResult> PostProduct([FromBody] Product model)
         {
@@ -35,6 +40,10 @@ namespace GeneralStoreAPI.Controllers
 
         // GET ALL
         // api/Product
+        /// <summary>
+        /// Gets all Product models in the database.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetAll()
         {
@@ -44,6 +53,11 @@ namespace GeneralStoreAPI.Controllers
 
         // GET BY ID
         // api/Product/{id}
+        /// <summary>
+        /// Gets the Product model with the corresponding SKU from the database.
+        /// </summary>
+        /// <param name="id">Product SKU</param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IHttpActionResult> GetBySKU([FromUri] int id)
         {
@@ -57,6 +71,12 @@ namespace GeneralStoreAPI.Controllers
 
         // PUT
         // api/Product/{id}
+        /// <summary>
+        /// Updates the Product model with the corresponding SKU in the database.
+        /// </summary>
+        /// <param name="id">Product SKU</param>
+        /// <param name="updatedProduct">Updated Product model</param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<IHttpActionResult> UpdateBySKU([FromUri] int id, [FromBody] Product updatedProduct)
         {
@@ -85,6 +105,11 @@ namespace GeneralStoreAPI.Controllers
 
         // DELETE
         // api/Product/{id}
+        /// <summary>
+        /// Deletes the Product model with the corresponding SKU from the database.
+        /// </summary>
+        /// <param name="id">Product SKU</param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<IHttpActionResult> DeleteProduct([FromUri] int id)
         {

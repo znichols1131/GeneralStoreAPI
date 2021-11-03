@@ -116,3 +116,4 @@ C:\Users\Zach Nichols\ElevenFiftyProjects\2_BlueBadge\GeneralStoreAPI\GeneralSto
 C:\Users\Zach Nichols\ElevenFiftyProjects\2_BlueBadge\GeneralStoreAPI\GeneralStoreAPI\obj\Debug\GeneralStoreAPI.Migrations.InitialCreate.resources
 C:\Users\Zach Nichols\ElevenFiftyProjects\2_BlueBadge\GeneralStoreAPI\GeneralStoreAPI\obj\Debug\GeneralStoreAPI.csproj.GenerateResource.cache
 C:\Users\Zach Nichols\ElevenFiftyProjects\2_BlueBadge\GeneralStoreAPI\GeneralStoreAPI\obj\Debug\GeneralStoreAPI.Migrations.InitialMigration.resources
+C:\Users\Zach Nichols\ElevenFiftyProjects\2_BlueBadge\GeneralStoreAPI\GeneralStoreAPI\bin\XmlDocument.xml
