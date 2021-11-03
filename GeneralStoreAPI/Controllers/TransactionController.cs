@@ -73,6 +73,28 @@ namespace GeneralStoreAPI.Controllers
             return Ok(transactions);
         }
 
+        // GET ALL by CustomerId
+        // api/Transaction?customerId={customerId}
+        [HttpGet]
+        public async Task<IHttpActionResult> GetAllByCustomerId([FromUri]int customerId)
+        {
+            List<Transaction> transactions = await _context.Transactions.Where(t => t.CustomerId == customerId).ToListAsync();
+            return Ok(transactions);
+        }
+
+        // GET by Transaction Id
+        // api/Transaction/{id}
+        [HttpGet]
+        public async Task<IHttpActionResult> GetById([FromUri] int id)
+        {
+            Transaction transaction = await _context.Transactions.FindAsync(id);
+
+            if (transaction is null)
+                return NotFound();
+
+            return Ok(transaction);
+        }
+
 
     }
 }
