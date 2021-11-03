@@ -12,7 +12,7 @@ namespace GeneralStoreAPI.Controllers
 {
     public class TransactionController : ApiController
     {
-        private readonly GeneralStoreDbContext _context = new GeneralStoreDbContext();
+        private readonly ApplicationDbContext _context = new ApplicationDbContext();
 
         // POST
         // api/Transaction
