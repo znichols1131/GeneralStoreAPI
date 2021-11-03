@@ -23,7 +23,6 @@ namespace GeneralStoreAPI.Models
         [Required, Range(0, int.MaxValue, ErrorMessage = "Error: the field 'ItemCount' must be positive.")]
         public int ItemCount { get; set; }
 
-        [Required]
         public DateTime DateOfTransaction { get; set; }
     }
 }
