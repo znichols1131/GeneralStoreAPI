@@ -60,6 +60,9 @@ namespace GeneralStoreAPI.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> UpdateById([FromUri] int id, [FromBody] Customer updatedCustomer)
         {
+            if (updatedCustomer is null)
+                return BadRequest("Your request body cannot be empty"); 
+            
             if (id != updatedCustomer.Id)
                 return BadRequest("Ids do not match");
 

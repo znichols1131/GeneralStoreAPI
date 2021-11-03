@@ -60,6 +60,9 @@ namespace GeneralStoreAPI.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> UpdateBySKU([FromUri] int id, [FromBody] Product updatedProduct)
         {
+            if (updatedProduct is null)
+                return BadRequest("Your request body cannot be empty");
+
             if (id != updatedProduct.SKU)
                 return BadRequest("SKUs do not match");
 
