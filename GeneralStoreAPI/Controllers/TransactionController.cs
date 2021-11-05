@@ -30,31 +30,39 @@ namespace GeneralStoreAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Get related objects
+            // Check that customer exists
             var customerEntity = await _context.Customers.FindAsync(model.CustomerId);
             if(customerEntity is null)
             {
                 return BadRequest($"The target Customer with the ID of {model.CustomerId} does not exist.");
-            }else
+            }
+            else
             {
                 model.Customer = customerEntity;
             }
 
-            var productEntity = await _context.Products.FindAsync(model.ProductSKU);
-            if (productEntity is null)
+            // Check that all products exist and have enough inventory to cover order
+            model.ProductSKUs = GetListOfIntegers(model.CombinedProductSKUString);
+            model.ItemCounts = GetListOfIntegers(model.CombinedItemCountString);
+            for(int i = 0; i < model.ProductSKUs.Count; i++)
             {
-                return BadRequest($"The target Product with the SKU of {model.ProductSKU} does not exist.");
-            }
-            else
-            {
-                model.Product = productEntity;
-            }
-
-
-            if (!model.Product.IsInStock || model.Product.NumberInInventory < model.ItemCount)
-            {
-                // Not enough product to cover transaction
-                return BadRequest("There is not enough product in stock to complete this transaction.");
+                int sku = model.ProductSKUs[i];
+                var productEntity = await _context.Products.FindAsync(sku);
+                if (productEntity is null)
+                {
+                    return BadRequest($"The target Product with the SKU of {sku} does not exist.");
+                }
+                else
+                {
+                    model.Products.Add(productEntity);
+                }
+                Product p = model.Products.ToList()[i];
+                // Also check that this won't exceed the inventory
+                if (!p.IsInStock || p.NumberInInventory < model.ItemCounts[i])
+                {
+                    // Not enough product to cover transaction
+                    return BadRequest($"There is not enough product (SKU: {sku})in stock to complete this transaction.");
+                }
             }
 
             // Set date of transaction
@@ -62,12 +70,18 @@ namespace GeneralStoreAPI.Controllers
 
             // Add transaction and reduce product in stock
             _context.Transactions.Add(model);
-            model.Product.NumberInInventory -= model.ItemCount;
-            if(await _context.SaveChangesAsync() == 1)
-                return Ok("Product was created.");
+            for (int i = 0; i < model.ProductSKUs.Count; i++)
+            {
+                model.Products.ToList()[i].NumberInInventory -= model.ItemCounts[i];
+            }
+
+            int changesSaved = await _context.SaveChangesAsync();
+            if(changesSaved > 0)
+                return Ok("Transaction was created.");
 
             return InternalServerError();
         }
+
 
         // GET ALL
         // api/Transaction
@@ -79,8 +93,14 @@ namespace GeneralStoreAPI.Controllers
         public async Task<IHttpActionResult> GetAll()
         {
             List<Transaction> transactions = await _context.Transactions.ToListAsync();
+            foreach(Transaction t in transactions)
+            {
+                t.ProductSKUs = GetListOfIntegers(t.CombinedProductSKUString);
+                t.ItemCounts = GetListOfIntegers(t.CombinedItemCountString);
+            }
             return Ok(transactions);
         }
+
 
         // GET ALL by CustomerId
         // api/Transaction?customerId={customerId}
@@ -93,8 +113,14 @@ namespace GeneralStoreAPI.Controllers
         public async Task<IHttpActionResult> GetAllByCustomerId([FromUri]int customerId)
         {
             List<Transaction> transactions = await _context.Transactions.Where(t => t.CustomerId == customerId).ToListAsync();
+            foreach (Transaction t in transactions)
+            {
+                t.ProductSKUs = GetListOfIntegers(t.CombinedProductSKUString);
+                t.ItemCounts = GetListOfIntegers(t.CombinedItemCountString);
+            }
             return Ok(transactions);
         }
+
 
         // GET by Transaction Id
         // api/Transaction/{id}
@@ -107,12 +133,15 @@ namespace GeneralStoreAPI.Controllers
         public async Task<IHttpActionResult> GetById([FromUri] int id)
         {
             Transaction transaction = await _context.Transactions.FindAsync(id);
+            transaction.ProductSKUs = GetListOfIntegers(transaction.CombinedProductSKUString);
+            transaction.ItemCounts = GetListOfIntegers(transaction.CombinedItemCountString);
 
             if (transaction is null)
                 return NotFound();
 
             return Ok(transaction);
         }
+
 
         // PUT
         // api/Transaction/{id}
@@ -150,50 +179,73 @@ namespace GeneralStoreAPI.Controllers
                 updatedTransaction.Customer = customerEntity;
             }
 
-            var productEntity = await _context.Products.FindAsync(updatedTransaction.ProductSKU);
-            if (productEntity is null)
+            // Check that all products exist and have enough inventory to cover order
+            originalTransaction.ProductSKUs = GetListOfIntegers(originalTransaction.CombinedProductSKUString);
+            originalTransaction.ItemCounts = GetListOfIntegers(originalTransaction.CombinedItemCountString);
+            updatedTransaction.ProductSKUs = GetListOfIntegers(updatedTransaction.CombinedProductSKUString);
+            updatedTransaction.ItemCounts = GetListOfIntegers(updatedTransaction.CombinedItemCountString);
+            for (int i = 0; i < updatedTransaction.ProductSKUs.Count; i++)
             {
-                return BadRequest($"The target Product with the SKU of {updatedTransaction.ProductSKU} does not exist.");
-            }
-            else
-            {
-                updatedTransaction.Product = productEntity;
+                int sku = updatedTransaction.ProductSKUs[i];
+                var productEntity = await _context.Products.FindAsync(sku);
+                if (productEntity is null)
+                {
+                    return BadRequest($"The target Product with the SKU of {sku} does not exist.");
+                }
+                else
+                {
+                    updatedTransaction.Products.Add(productEntity);
+                }
             }
 
-            // Logic for checking product availability
-            if(originalTransaction.ProductSKU == updatedTransaction.ProductSKU)
+            // Check that this new transaction won't exceed the inventory
+            // Note: this can't be accomplished in the above for loop because not all products have been retrieved at that point.
+            for (int i = 0; i < updatedTransaction.ProductSKUs.Count; i++)
             {
-                // Same product, only need to check for additional product
-                if(updatedTransaction.ItemCount - originalTransaction.ItemCount > originalTransaction.Product.NumberInInventory)
-                    return BadRequest("There is not enough product in stock to complete this transaction.");
-            }
-            else
-            {
-                // Different product, need to check that the new product has enough inventory
-                if(updatedTransaction.ItemCount > updatedTransaction.Product.NumberInInventory)
-                    return BadRequest("There is not enough product in stock to complete this transaction.");
+                int sku = updatedTransaction.ProductSKUs[i];
+
+                // Also check that this new transaction won't exceed the inventory
+                int previousAmountOrdered = 0;
+                for(int j = 0; j < originalTransaction.ProductSKUs.Count; j++)
+                {
+                    int originalSKU = originalTransaction.ProductSKUs[j];
+                    if (sku == originalSKU)
+                        previousAmountOrdered += originalTransaction.ItemCounts[j];
+                }
+
+                if(updatedTransaction.ItemCounts[i] - previousAmountOrdered > updatedTransaction.Products.ToList()[i].NumberInInventory)
+                    return BadRequest($"There is not enough product (SKU: {sku})in stock to complete this transaction.");
             }
 
             // Return old items "to shelf"
-            originalTransaction.Product.NumberInInventory += originalTransaction.ItemCount;
+            for (int j = 0; j < originalTransaction.Products.Count; j++)
+            {
+                originalTransaction.Products.ToList()[j].NumberInInventory += originalTransaction.ItemCounts[j];
+            }
 
             // Update transaction
             originalTransaction.CustomerId = updatedTransaction.CustomerId;
             originalTransaction.Customer = updatedTransaction.Customer;
-            originalTransaction.ProductSKU = updatedTransaction.ProductSKU;
-            originalTransaction.Product = updatedTransaction.Product;
-            originalTransaction.ItemCount = updatedTransaction.ItemCount;
+            originalTransaction.CombinedProductSKUString = updatedTransaction.CombinedProductSKUString;
+            originalTransaction.ProductSKUs = updatedTransaction.ProductSKUs;
+            originalTransaction.Products = updatedTransaction.Products;
+            originalTransaction.CombinedItemCountString = updatedTransaction.CombinedItemCountString;
+            originalTransaction.ItemCounts = updatedTransaction.ItemCounts;
             originalTransaction.DateOfTransaction = DateTime.Now;       // Note: this assumes that the transaction date must be updated to reflect changes
 
-            // Fulfill new order
-            originalTransaction.Product.NumberInInventory -= originalTransaction.ItemCount;
+            // Fulfill new order (note: originalTransaction has already taken the new data from updatedTransaction
+            for(int i = 0; i < originalTransaction.Products.Count; i++)
+            {
+                originalTransaction.Products.ToList()[i].NumberInInventory -= originalTransaction.ItemCounts[i];
+            }
 
             // Save
-            if (await _context.SaveChangesAsync() == 1)
-                return Ok("Transaction #{originalTransaction.Id} was updated.");
+            if (await _context.SaveChangesAsync() > 0)
+                return Ok($"Transaction #{originalTransaction.Id} was updated.");
 
             return InternalServerError();
         }
+
 
         // DELETE
         // api/Transaction/{id}
@@ -210,15 +262,41 @@ namespace GeneralStoreAPI.Controllers
             if (transaction is null)
                 return NotFound();
 
+            transaction.ProductSKUs = GetListOfIntegers(transaction.CombinedProductSKUString);
+            transaction.ItemCounts = GetListOfIntegers(transaction.CombinedItemCountString);
+
             // Return old items "to shelf"
-            transaction.Product.NumberInInventory += transaction.ItemCount;
+            for (int j = 0; j < transaction.Products.Count; j++)
+            {
+                transaction.Products.ToList()[j].NumberInInventory += transaction.ItemCounts[j];
+            }
 
             _context.Transactions.Remove(transaction);
 
-            if (await _context.SaveChangesAsync() == 1)
+            if (await _context.SaveChangesAsync() > 0)
                 return Ok("Transactiton was deleted.");
 
             return InternalServerError();
+        }
+
+        private List<int> GetListOfIntegers(string commaDelimString)
+        {
+            try
+            {
+                string[] listOfStrings = commaDelimString.Split(',');
+                List<int> listOfInts = new List<int>();
+
+                foreach(string s in listOfStrings)
+                {
+                    listOfInts.Add(int.Parse(s.Trim()));
+                }
+
+                return listOfInts;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

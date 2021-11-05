@@ -223,6 +223,14 @@
     <Compile Include="Migrations\202111031642393_InitialMigration.Designer.cs">
       <DependentUpon>202111031642393_InitialMigration.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202111042312321_MultipleProducts.cs" />
+    <Compile Include="Migrations\202111042312321_MultipleProducts.Designer.cs">
+      <DependentUpon>202111042312321_MultipleProducts.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202111052052257_HashStack.cs" />
+    <Compile Include="Migrations\202111052052257_HashStack.Designer.cs">
+      <DependentUpon>202111052052257_HashStack.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -329,6 +337,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202111031642393_InitialMigration.resx">
       <DependentUpon>202111031642393_InitialMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202111042312321_MultipleProducts.resx">
+      <DependentUpon>202111042312321_MultipleProducts.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202111052052257_HashStack.resx">
+      <DependentUpon>202111052052257_HashStack.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

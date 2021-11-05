@@ -16,13 +16,20 @@ namespace GeneralStoreAPI.Models
         public int CustomerId { get; set; }
         public virtual Customer Customer { get; set; }
 
-        [Required, ForeignKey(nameof(Product))]
-        public int ProductSKU { get; set; }
-        public virtual Product Product { get; set; }
+        [Required]
+        public string CombinedProductSKUString { get; set; }
+        public List<int> ProductSKUs { get; set; } = new List<int>();
+        public virtual ICollection<Product> Products { get; set; }
 
-        [Required, Range(0, int.MaxValue, ErrorMessage = "Error: the field 'ItemCount' must be positive.")]
-        public int ItemCount { get; set; }
+        [Required]
+        public string CombinedItemCountString { get; set; }
+        public List<int> ItemCounts { get; set; } = new List<int>();
 
         public DateTime DateOfTransaction { get; set; }
+
+        public Transaction()
+        {
+            Products = new HashSet<Product>();
+        }
     }
 }

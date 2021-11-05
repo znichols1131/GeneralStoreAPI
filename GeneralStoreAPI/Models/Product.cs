@@ -20,6 +20,14 @@ namespace GeneralStoreAPI.Models
         [Required, Range(0, int.MaxValue, ErrorMessage = "Error: the field 'NumberInInventory' must be positive.")]
         public int NumberInInventory { get; set; }
 
+        // I don't really want to keep track of this
+        //public virtual ICollection<Transaction> Transactions { get; set; }
+
+        //public Product()
+        //{
+        //    Transactions = new HashSet<Transaction>();
+        //}
+        
         public bool IsInStock 
         {
             get
