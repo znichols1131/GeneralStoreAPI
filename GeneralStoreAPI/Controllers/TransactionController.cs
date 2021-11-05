@@ -179,11 +179,18 @@ namespace GeneralStoreAPI.Controllers
                 updatedTransaction.Customer = customerEntity;
             }
 
-            // Check that all products exist and have enough inventory to cover order
+            // Populate ProductSKUs and ItemCounts from comma-delimited strings
             originalTransaction.ProductSKUs = GetListOfIntegers(originalTransaction.CombinedProductSKUString);
             originalTransaction.ItemCounts = GetListOfIntegers(originalTransaction.CombinedItemCountString);
             updatedTransaction.ProductSKUs = GetListOfIntegers(updatedTransaction.CombinedProductSKUString);
             updatedTransaction.ItemCounts = GetListOfIntegers(updatedTransaction.CombinedItemCountString);
+
+            // If user did not input the products themselves, we need to populate the Products list based on ProductSKUs
+            bool updatedTransactionNeedsProducts = (updatedTransaction.Products.Count != updatedTransaction.ProductSKUs.Count);
+            if (updatedTransactionNeedsProducts)
+                updatedTransaction.ProductSKUs.Clear();
+
+            // Check that all products exist and have enough inventory to cover order
             for (int i = 0; i < updatedTransaction.ProductSKUs.Count; i++)
             {
                 int sku = updatedTransaction.ProductSKUs[i];
@@ -194,7 +201,8 @@ namespace GeneralStoreAPI.Controllers
                 }
                 else
                 {
-                    updatedTransaction.Products.Add(productEntity);
+                    if(updatedTransactionNeedsProducts)
+                        updatedTransaction.Products.Add(productEntity);
                 }
             }
 
